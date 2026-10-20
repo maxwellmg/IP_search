@@ -1,0 +1,12 @@
+[project]
+name = "ip-intel"
+version = "0.1.0"
+description = "Everything knowable from an IP address, with every value labeled by source."
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+maxmind = ["maxminddb"]
+
+[project.scripts]
+ip-intel = "ipintel.cli:main"

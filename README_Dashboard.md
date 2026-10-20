@@ -1,10 +1,36 @@
 Threshold Bar =
-VAR _val    = SELECTEDVALUE ( Metrics[Value] )
-VAR _opt    = SELECTEDVALUE ( Metrics[Optimized] )
-VAR _stb    = SELECTEDVALUE ( Metrics[Stable] )
-VAR _mon    = SELECTEDVALUE ( Metrics[Monitor] )
-VAR _isHigh = SELECTEDVALUE ( Metrics[Target Direction] ) = ">"
+VAR _val      = SELECTEDVALUE ( Metrics[Value] )
+VAR _opt      = SELECTEDVALUE ( Metrics[Optimized] )
+VAR _stb      = SELECTEDVALUE ( Metrics[Stable] )
+VAR _mon      = SELECTEDVALUE ( Metrics[Monitor] )
+VAR _isHigh   = SELECTEDVALUE ( Metrics[Target Direction] ) = ">"
+VAR _isBinary = SELECTEDVALUE ( Metrics[Binary] ) = 1
+VAR _binVal   = SELECTEDVALUE ( Metrics[Binary_value] )
 
+-- Colors (%23 = #)
+VAR _red    = "%23D64545"
+VAR _yellow = "%23F2C94C"
+VAR _green  = "%2327AE60"
+VAR _blue   = "%232F80ED"
+
+-- ===== Binary icon =====
+VAR _pass      = _binVal = 1
+VAR _iconColor = IF ( _pass, _green, _red )
+VAR _iconMark =
+    IF (
+        _pass,
+        "<path d='M18 23 l3.5 3.5 l6.5 -7' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/>",
+        "<path d='M19.5 19.5 l7 7 M26.5 19.5 l-7 7' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round'/>"
+    )
+VAR _iconSvg =
+    "data:image/svg+xml;utf8," &
+    "<svg xmlns='http://www.w3.org/2000/svg' width='328' height='46' font-family='Segoe UI' font-size='11' fill='%23333333'>" &
+    "<circle cx='23' cy='23' r='9' fill='" & _iconColor & "'/>" &
+    _iconMark &
+    "<text x='38' y='27' font-weight='bold'>" & IF ( _pass, "Pass", "Fail" ) & "</text>" &
+    "</svg>"
+
+-- ===== Threshold bar =====
 -- Scale: range of value + thresholds, padded 15% each side
 VAR _min  = MIN ( MIN ( _val, _opt ), MIN ( _stb, _mon ) )
 VAR _max  = MAX ( MAX ( _val, _opt ), MAX ( _stb, _mon ) )
@@ -34,11 +60,7 @@ VAR _t1 = IF ( _isHigh, _mon, _opt )
 VAR _t2 = _stb
 VAR _t3 = IF ( _isHigh, _opt, _mon )
 
--- Colors (%23 = #)
-VAR _red    = "%23D64545"
-VAR _yellow = "%23F2C94C"
-VAR _green  = "%2327AE60"
-VAR _blue   = "%232F80ED"
+-- Segment colors left to right
 VAR _c1 = IF ( _isHigh, _red,    _blue )
 VAR _c2 = IF ( _isHigh, _yellow, _green )
 VAR _c3 = IF ( _isHigh, _green,  _yellow )
@@ -61,12 +83,18 @@ VAR _marker =
     "<text x='" & _xVal & "' y='" & ( _barY - 5 ) & "' text-anchor='middle' font-weight='bold'>" &
     FORMAT ( _val, "0.00" ) & "</text>"
 
-RETURN
-IF (
-    ISBLANK ( _val ),
-    BLANK (),
+VAR _barSvg =
     "data:image/svg+xml;utf8," &
     "<svg xmlns='http://www.w3.org/2000/svg' width='328' height='46' font-family='Segoe UI' font-size='10' fill='%23333333'>" &
     _rects & _labels & _marker &
     "</svg>"
+
+-- ===== Output =====
+RETURN
+SWITCH (
+    TRUE (),
+    _isBinary && ISBLANK ( _binVal ), BLANK (),
+    _isBinary, _iconSvg,
+    ISBLANK ( _val ), BLANK (),
+    _barSvg
 )

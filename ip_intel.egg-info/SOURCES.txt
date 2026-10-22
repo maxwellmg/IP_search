@@ -1,0 +1,9 @@
+README.md
+pyproject.toml
+ip_intel.egg-info/PKG-INFO
+ip_intel.egg-info/SOURCES.txt
+ip_intel.egg-info/dependency_links.txt
+ip_intel.egg-info/entry_points.txt
+ip_intel.egg-info/requires.txt
+ip_intel.egg-info/top_level.txt
+tests/test_offline.py

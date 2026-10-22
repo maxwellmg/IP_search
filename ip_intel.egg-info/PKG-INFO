@@ -1,0 +1,7 @@
+Metadata-Version: 2.4
+Name: ip-intel
+Version: 0.1.0
+Summary: Everything knowable from an IP address, with every value labeled by source.
+Requires-Python: >=3.10
+Provides-Extra: maxmind
+Requires-Dist: maxminddb; extra == "maxmind"

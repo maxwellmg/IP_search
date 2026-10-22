@@ -21,6 +21,48 @@ python3.12 -m ipintel 198.51.100.4 --json           # machine-readable output
 `Intl.DateTimeFormat().resolvedOptions().timeZone`. A device timezone that doesn't match the IP's
 timezone is a classic VPN/proxy tell.
 
+## Running the offline version in a Jupyter notebook
+
+If you want to analyze a Python list of IP addresses with no API calls at all, call the library
+from a notebook and set `offline=True`. This is equivalent to running the CLI with `--offline`.
+
+```python
+import ipaddress
+from types import SimpleNamespace
+
+from ipintel.cli import investigate
+from ipintel.compare import Claims
+
+ips = [
+    "203.0.113.7",
+    "198.51.100.4",
+    "2001:db8::1",
+]
+
+opts = SimpleNamespace(
+    offline=True,
+    no_third_party=False,
+    skip_icloud=False,
+    mmdb=None,
+    no_sources=False,
+)
+
+results = []
+for raw_ip in ips:
+    ip = ipaddress.ip_address(raw_ip.strip().strip("[]"))
+    results.append(investigate(ip, Claims(), opts))
+
+# Example: inspect the first result
+print(results[0]["ip"])
+print(results[0]["signals"])
+print(results[0]["sections"][0]["title"])
+```
+
+This keeps the analysis limited to local address-structure checks (scope, embedded IPv4, reserved
+space, etc.) and does not contact RDAP, RIPEstat, DNS, or third-party geo APIs. If you want to
+compare the same list against claimed user details, pass a `Claims(...)` object with fields like
+`country`, `region`, `city`, `timezone`, `isp`, `lat`, and `lon`.
+
 ## Output
 
 1. **Signals**: potential fraud indicators ranked `high / medium / low / info`. Each one names

@@ -6,6 +6,7 @@ import json
 import sys
 from concurrent.futures import ThreadPoolExecutor
 
+from ipintel import load_config
 from . import dns_checks, geo, heuristics, lists, local, registry
 from .compare import Claims, evaluate
 from .model import Section
@@ -13,6 +14,7 @@ from .report import render_text
 
 
 def main(argv=None):
+    config = load_config()
     p = argparse.ArgumentParser(
         prog="ip-intel",
         description="Everything knowable from an IP address, with the source of every value labeled.")
@@ -33,6 +35,18 @@ def main(argv=None):
     g.add_argument("--claimed-isp", help="e.g. 'Comcast'")
     g.add_argument("--claimed-latlon", help="'lat,lon' from billing/shipping geocode or device GPS")
     a = p.parse_args(argv)
+
+    # Apply config defaults only when CLI explicitly didn't opt in/out.
+    if config.get("offline") is True and not a.offline:
+        a.offline = True
+    if config.get("no_third_party") is True and not a.no_third_party:
+        a.no_third_party = True
+    if config.get("skip_icloud") is True and not a.skip_icloud:
+        a.skip_icloud = True
+    if config.get("mmdb") and not a.mmdb:
+        a.mmdb = config["mmdb"]
+    if config.get("no_sources") is True and not a.no_sources:
+        a.no_sources = True
 
     lat = lon = None
     if a.claimed_latlon:

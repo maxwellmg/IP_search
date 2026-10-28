@@ -1,15 +1,12 @@
 from __future__ import annotations
 
-from pathlib import Path
 import json
 import os
+from pathlib import Path
 
 __version__ = "0.1.0"
 
-_repo_root = Path(__file__).resolve().parent.parent
-_legacy_root = _repo_root / "ip-intel"
-if _legacy_root.exists():
-    __path__.append(str(_legacy_root))
+_REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 def _config_file() -> Path:
@@ -19,11 +16,11 @@ def _config_file() -> Path:
         if candidate.exists():
             return candidate
 
-    for candidate in (_repo_root / "ipintel.json", _repo_root / ".ipintel.json"):
+    for candidate in (_REPO_ROOT / "ipintel.json", _REPO_ROOT / ".ipintel.json"):
         if candidate.exists():
             return candidate
 
-    return _repo_root / "ipintel.json"
+    return _REPO_ROOT / "ipintel.json"
 
 
 def load_config() -> dict:

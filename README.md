@@ -1,4 +1,4 @@
-# ip-intel
+# ipintel
 
 A one-off CLI that pulls together everything knowable from a single IP address. Every value it
 outputs is labeled with the source it came from, so you can judge how much to trust it. It then
@@ -63,6 +63,43 @@ space, etc.) and does not contact RDAP, RIPEstat, DNS, or third-party geo APIs. 
 compare the same list against claimed user details, pass a `Claims(...)` object with fields like
 `country`, `region`, `city`, `timezone`, `isp`, `lat`, and `lon`.
 
+## Run without importing `ipintel`
+
+If you do not want any `from ipintel...` imports at all, use the bundled standalone script instead.
+This version is fully self-contained and works in a brand-new Python environment as long as you can
+run a Python file.
+
+```bash
+python3.12 offline_ipintel.py --ips 203.0.113.7 198.51.100.4 2001:db8::1
+```
+
+You can also read the list from a file, one IP per line:
+
+```bash
+python3.12 offline_ipintel.py --file ip_list.txt
+```
+
+Or read directly from a CSV file with an `ip`/`ip_address`/`address` column:
+
+```bash
+python3.12 offline_ipintel.py --csv ips.csv --ip-column ip --csv-output analyzed_ips.csv
+```
+
+The CSV mode keeps all original columns and adds:
+
+- `scope`
+- `version`
+- `signals`
+
+In a notebook, you can call the script directly without importing the package:
+
+```python
+!python offline_ipintel.py --csv ips.csv --ip-column ip --csv-output analyzed_ips.csv
+```
+
+The script is offline-only and therefore does not call RDAP, DNS, RIPEstat, or commercial geo APIs.
+It uses only the Python standard library.
+
 ## Output
 
 1. **Signals**: potential fraud indicators ranked `high / medium / low / info`. Each one names
@@ -113,7 +150,7 @@ The full text of each source's meaning and caveats is in
   production fraud work, use paid keys or a local MaxMind database.
 - Spamhaus refuses queries from public resolvers (8.8.8.8, 1.1.1.1…). Those show up as
   `query refused`, not as clean.
-- Bulk lists are cached in `~/.cache/ip-intel` (override with `IPINTEL_CACHE`).
+- Bulk lists are cached in `~/.cache/ipintel` (override with `IPINTEL_CACHE`).
 
 ## What an IP can't tell you
 
